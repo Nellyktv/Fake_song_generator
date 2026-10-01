@@ -1,27 +1,37 @@
-Music Store — fake song generator
+# Music Store — fake song generator
 
 The app generates fake songs (title, artist, album, genre, cover and the track itself) from a given seed. Nothing is stored — everything is generated on the server per request, but the same seed always produces the same result.
 
-Live demo: https://task5-gy3r.onrender.com
+**Live demo:** https://task5-gy3r.onrender.com
 
-Tech stack
+![Song details with the track playing](docs/screenshots/player.png)
 
-Frontend: React + TypeScript + Vite, MUI, Zustand, Tone.js + smplr (audio in the browser), Axios.
-Backend: Node.js + Express, faker (data), seedrandom (RNG), Tonal (music), @napi-rs/canvas (covers).
+## Screenshots
 
-Structure
+| Gallery view                                       | German locale                                         |
+| -------------------------------------------------- | ----------------------------------------------------- |
+| ![Gallery view](docs/screenshots/gallery.png) | ![German locale](docs/screenshots/table-de.png) |
 
-task5/
+## Tech stack
+
+- **Frontend:** React + TypeScript + Vite, MUI, Zustand, Tone.js + smplr (audio in the browser), Axios.
+- **Backend:** Node.js + Express, faker (data), seedrandom (RNG), Tonal (music), @napi-rs/canvas (covers).
+
+## Structure
+
+```
+Fake_song_generator/
 ├── backend/     Express API and generation
 └── frontend/    React app
+```
 
-How it works
+## How it works
 
-The browser requests a page of 20 songs from the server: /api/songs?seed=...&page=...&lang=...&likes=...
-The server combines the seed with the page number, seeds faker and generates the songs in memory.
-Covers and music are loaded separately by their own seeds: /api/covers and /api/audio/:seed.
+1. The browser requests a page of 20 songs from the server: `/api/songs?seed=...&page=...&lang=...&likes=...`
+2. The server combines the seed with the page number, seeds faker and generates the songs in memory.
+3. Covers and music are loaded separately by their own seeds: `/api/covers` and `/api/audio/:seed`.
 
-In production it runs as a single service: the root Dockerfile builds the frontend and copies it into the backend, which serves the static files and the /api routes from one port.
+In production it runs as a single service: the root Dockerfile builds the frontend and copies it into the backend, which serves the static files and the `/api` routes from one port.
 
 The parameters (language, seed, likes) are independent. Changing likes does not change titles or covers — only the like counts. A fractional likes value works probabilistically: 0.5 gives on average 1 like per 2 songs.
 
@@ -29,28 +39,34 @@ Covers are drawn on canvas: a palette and one of three styles (rings, bands, sha
 
 Music is assembled from a score returned by the server (chords, bass, melody, drums, tempo). On the client it is played by Tone.js, and the instrument sounds are loaded by smplr.
 
-Locales (en, de, ru) live as JSON dictionaries in backend/locales — a new language is added with a file, without touching the code.
+Locales (en, de, ru) live as JSON dictionaries in `backend/locales` — a new language is added with a file, without touching the code.
 
-Run
+## Run
 
 With Docker (one service — the backend builds and serves the frontend):
 
+```bash
 docker compose up --build
+```
 
 App — http://localhost:3000
 
 Manually (for development, run each block in its own terminal from the project root):
 
-backend:
+**Backend:**
 
+```bash
 cd backend
 npm install
 npm run dev
+```
 
-frontend:
+**Frontend:**
 
+```bash
 cd frontend
 pnpm install
 pnpm dev
+```
 
-In dev the frontend runs on http://localhost:5173 and proxies /api to the backend on port 3000.
+In dev the frontend runs on http://localhost:5173 and proxies `/api` to the backend on port 3000.
